@@ -1,0 +1,130 @@
+
+	import java.util.Scanner;
+
+import javax.xml.parsers.SAXParser;
+	import javax.xml.parsers.SAXParserFactory;
+	import org.xml.sax.Attributes;
+	import org.xml.sax.SAXException;
+	import org.xml.sax.helpers.DefaultHandler;
+public class SaxForCraiglist {
+
+	public static void main(String[] args) {
+		System.out.println("please enter the price limit for aptartment");//Maximumt rent willing to pay
+		Scanner sin = new Scanner(System.in);
+		int  priceLimit = sin.nextInt();
+		
+		 try {
+
+				SAXParserFactory factory = SAXParserFactory.newInstance();//Sax parser to parse through different websites
+				SAXParser saxParser = factory.newSAXParser();
+
+				DefaultHandler handler = new DefaultHandler() {
+
+				boolean url = false;
+				boolean title = false;
+				boolean price = false;
+				boolean location = false;
+				boolean link = false;
+				//boolean dispFlag = false;
+				String linksubStr ;
+				int listPrice = 0;
+				
+				
+				// method to identify start of a element
+				public void startElement(String uri, String localName,String qName, 
+			                Attributes attributes) throws SAXException {
+
+					
+					if (qName.equalsIgnoreCase("link")) {
+						link = true;
+					}
+					
+					if (qName.equalsIgnoreCase("url")) {
+						url = true;
+					}
+					
+					if (qName.equalsIgnoreCase("title")) {
+						title = true;
+					}
+
+					if (qName.equalsIgnoreCase("price")) {
+						price= true;
+					}
+
+					if (qName.equalsIgnoreCase("location")) {
+						location = true;
+					}
+				}
+				// method to identify end of a element
+				public void endElement(String uri, String localName,
+					String qName) throws SAXException {
+
+					
+				}
+				// method to extract different elements required from the website
+				public void characters(char ch[], int start, int length) throws SAXException {
+					//dispFlag = false;
+					if (price) {
+						
+						
+						
+						String prc = new String(ch, start, length);
+						String noDollar = prc.substring(1);
+						
+						noDollar = noDollar.trim();
+						if(!noDollar.isEmpty())
+						{
+							listPrice = Integer.parseInt(noDollar);
+						
+						
+
+						if(listPrice<priceLimit)
+						{
+						System.out.println("PRICE : " +prc);	
+						//dispFlag = true;
+						}
+					}
+						
+						price = false;
+					}
+					
+					if (link&&(listPrice<priceLimit)) {
+						String linkStr = new String(ch, start, length);
+						linksubStr = linkStr.substring(0,31);
+						
+						link = false;
+					}
+					
+					if (url&&(listPrice<priceLimit)) {
+						String urlFull = "";
+						
+						urlFull = linksubStr + new String(ch, start, length);
+						System.out.println("URL : " + urlFull);
+						url = false;
+					}
+
+					
+					
+					if (title&&(listPrice<priceLimit)) {
+						System.out.println("Apt Description : " + new String(ch, start, length));
+						title = false;
+					}
+					
+					if (location&&(listPrice<priceLimit)) {
+						System.out.println("Location : " + new String(ch, start, length));
+						location = false;
+					}
+					
+					
+				}
+			};
+
+			saxParser.parse("C:\\Users\\Darshan\\Desktop\\AptFinderSax\\AptFinderSax\\craigslist1.xml", handler);
+			 
+			     } catch (Exception e) {
+			       e.printStackTrace();
+			     }
+			  sin.close();
+			   }
+			
+			}
